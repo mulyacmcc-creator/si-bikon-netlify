@@ -1380,26 +1380,50 @@ async function handleSavePembinaan(e) {
   }
 }
 
-  function deletePembinaanItem(id) {
-    if (!confirm("Hapus agenda pembinaan ini?")) return;
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .deletePembinaan(id);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.pembinaan = (mockDB.pembinaan || []).filter(p => p.id !== id);
-        showToast("Data berhasil dihapus!");
-        loadAllData();
-      }, 300);
-    }
+async function deletePembinaanItem(id) {
+  const isConfirmed = confirm(
+    'Apakah Anda yakin ingin menghapus agenda pembinaan ini?'
+  );
+
+  if (!isConfirmed) {
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest('deletePembinaan', {
+      id: id
+    });
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Agenda pembinaan berhasil dihapus!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Agenda pembinaan gagal dihapus.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Delete pembinaan error:', error);
+
+    showToast(
+      'Tidak dapat menghapus agenda pembinaan dari Spreadsheet.',
+      false
+    );
+  }
+}
 
   function openModalDaftar(pembinaanId) {
     const target = (appData.pembinaan || []).find(p => p.id === pembinaanId);
