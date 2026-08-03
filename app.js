@@ -2149,7 +2149,7 @@ async function handleSavePengawasan(e) {
       'savePengawasan',
       payload
     );
-    console.log('RESPON SAVE PENGAWASAN:', res);
+    
     endLoading();
 
     if (res && res.status === 'success') {
@@ -2203,13 +2203,7 @@ async function deletePengawasanItem(id) {
         id: id
       }
     );
-    console.log(
-  'RESPON DELETE PENGAWASAN:',
-  {
-    idDikirim: id,
-    responsBackend: res
-  }
-  );
+    
     endLoading();
 
     if (res && res.status === 'success') {
