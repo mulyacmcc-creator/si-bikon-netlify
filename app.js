@@ -2321,15 +2321,7 @@ async function deletePengawasanItem(id) {
     loginPassword.value = '';
   }
 
-  // Badge preview hanya muncul jika dibuka sebagai HTML biasa
-  if (!isGasEnvironment) {
-    const badge = document.getElementById('previewBadge');
-
-    if (badge) {
-      badge.classList.remove('hidden');
-    }
-  }
-};
+ };
 window.addEventListener('load', function () {
   testApiConnection();
 });
