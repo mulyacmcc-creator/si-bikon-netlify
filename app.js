@@ -1198,26 +1198,50 @@ async function handleSaveTK(e) {
   }
 }
 
-  function deleteTKItem(id) {
-    if (!confirm("Hapus data tenaga kerja ini?")) return;
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .deleteTenagaKerja(id);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.tenagaKerja = (mockDB.tenagaKerja || []).filter(t => t.id !== id);
-        showToast("Data berhasil dihapus!");
-        loadAllData();
-      }, 300);
-    }
+async function deleteTKItem(id) {
+  const isConfirmed = confirm(
+    'Apakah Anda yakin ingin menghapus data tenaga kerja ini?'
+  );
+
+  if (!isConfirmed) {
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest('deleteTenagaKerja', {
+      id: id
+    });
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Data tenaga kerja berhasil dihapus!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data tenaga kerja gagal dihapus.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Delete tenaga kerja error:', error);
+
+    showToast(
+      'Tidak dapat menghapus data tenaga kerja dari Spreadsheet.',
+      false
+    );
+  }
+}
 
   function renderPembinaanGrid() {
     const container = document.getElementById('gridPembinaan');
