@@ -122,7 +122,7 @@ async function testApiConnection() {
     }
   }
 
-  function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
 
   const username = document
@@ -142,67 +142,43 @@ async function testApiConnection() {
 
   showLoading();
 
-  if (isGasEnvironment) {
-    google.script.run
-      .withSuccessHandler(function(res) {
-        endLoading();
-
-        if (res && res.status === 'success') {
-          currentUser = res.user;
-
-          setupUserSession();
-
-          showToast(
-            'Selamat datang, ' +
-            (currentUser.fullName || currentUser.username) +
-            '!'
-          );
-
-          loadAllData();
-        } else {
-          showToast(
-            res && res.message
-              ? res.message
-              : 'Username atau password salah!',
-            false
-          );
-        }
-      })
-      .withFailureHandler(function(err) {
-        endLoading();
-
-        showToast(
-          'Terjadi kesalahan sistem: ' +
-          (err && err.message ? err.message : err),
-          false
-        );
-      })
-      .loginUser(username, password);
-  } else {
-    endLoading();
-
-    const found = mockDB.users.find(function(user) {
-      return (
-        user.username === username &&
-        user.password === password
-      );
+  try {
+    const res = await apiRequest('login', {
+      username: username,
+      password: password
     });
 
-    if (!found) {
-      showToast('Username atau password salah!', false);
-      return;
-    }
+    endLoading();
 
-    currentUser = found;
-    setupUserSession();
+    if (res && res.status === 'success') {
+      currentUser = res.user;
+
+      setupUserSession();
+
+      showToast(
+        'Selamat datang, ' +
+        (currentUser.fullName || currentUser.username) +
+        '!'
+      );
+
+      loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Username atau password salah!',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Login error:', error);
 
     showToast(
-      'Selamat datang, ' +
-      (currentUser.fullName || currentUser.username) +
-      '!'
+      'Tidak dapat terhubung ke backend login.',
+      false
     );
-
-    loadAllData();
   }
 }
   function handleRegister(e) {
