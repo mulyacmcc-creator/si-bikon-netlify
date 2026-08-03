@@ -2097,13 +2097,14 @@ function openModalPengawasan(data = null) {
     if (item) openModalPengawasan(item);
   }
 
-function handleSavePengawasan(e) {
+async function handleSavePengawasan(e) {
   e.preventDefault();
 
   const payload = {
     id: document
       .getElementById('pgwId')
-      .value,
+      .value
+      .trim(),
 
     judulPekerjaan: document
       .getElementById('pgwJudul')
@@ -2160,43 +2161,60 @@ function handleSavePengawasan(e) {
     return;
   }
 
+  if (!payload.tahun) {
+    showToast(
+      'Tahun pengawasan wajib diisi.',
+      false
+    );
+    return;
+  }
+
+  if (!payload.checklistK3) {
+    showToast(
+      'Checklist K3 wajib diisi.',
+      false
+    );
+    return;
+  }
+
   showLoading();
 
-  if (isGasEnvironment) {
-    google.script.run
-      .withSuccessHandler(function(res) {
-        endLoading();
+  try {
+    const res = await apiRequest(
+      'savePengawasan',
+      payload
+    );
 
-        if (res && res.status === 'success') {
-          closeModal('modalPengawasan');
-          showToast(res.message, true);
-          loadAllData();
-        } else {
-          showToast(
-            res && res.message
-              ? res.message
-              : 'Data gagal disimpan.',
-            false
-          );
-        }
-      })
-      .withFailureHandler(function(err) {
-        endLoading();
-
-        showToast(
-          'Gagal menyimpan pengawasan: ' +
-          (err && err.message
-            ? err.message
-            : err),
-          false
-        );
-      })
-      .savePengawasan(payload);
-  } else {
     endLoading();
 
+    if (res && res.status === 'success') {
+      closeModal('modalPengawasan');
+
+      showToast(
+        res.message ||
+          'Data pengawasan berhasil disimpan!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data pengawasan gagal disimpan.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error(
+      'Save pengawasan error:',
+      error
+    );
+
     showToast(
-      'Upload foto hanya tersedia pada Web App.',
+      'Tidak dapat menyimpan data pengawasan dan foto.',
       false
     );
   }
