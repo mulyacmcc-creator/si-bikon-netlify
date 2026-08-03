@@ -1622,26 +1622,56 @@ async function changeStatusReg(id, status) {
   }
 }
 
-  function deleteRegItem(id) {
-    if (!confirm("Hapus data pendaftaran ini?")) return;
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .deletePendaftaran(id);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.pendaftaran = (mockDB.pendaftaran || []).filter(r => r.id !== id);
-        showToast("Pendaftaran berhasil dihapus!");
-        loadAllData();
-      }, 300);
-    }
+async function deleteRegItem(id) {
+  const isConfirmed = confirm(
+    'Apakah Anda yakin ingin menghapus atau membatalkan pendaftaran ini?'
+  );
+
+  if (!isConfirmed) {
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'deletePendaftaran',
+      {
+        id: id
+      }
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Pendaftaran berhasil dihapus!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Pendaftaran gagal dihapus.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error(
+      'Delete pendaftaran error:',
+      error
+    );
+
+    showToast(
+      'Tidak dapat menghapus pendaftaran dari Spreadsheet.',
+      false
+    );
+  }
+}
 
   function renderUsersTable() {
     const tbody = document.getElementById('tblUsers');
