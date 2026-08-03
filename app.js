@@ -730,47 +730,67 @@ function parseCoordinate(value) {
     if (item) openModalBUJK(item);
   }
 
-  function handleSaveBUJK(e) {
-    e.preventDefault();
-    const payload = {
-      id: document.getElementById('bujkId').value,
-      namaBujk: document.getElementById('bujkNama').value,
-      nib: document.getElementById('bujkNib').value,
-      pjbu: document.getElementById('bujkPjbu').value,
-      kualifikasi: document.getElementById('bujkKualifikasi').value,
-      klasifikasi: document.getElementById('bujkKlasifikasi').value,
-      alamat: document.getElementById('bujkAlamat').value,
-      noTelepon: document.getElementById('bujkTelepon').value,
-      statusSbu: document.getElementById('bujkStatusSbu').value
-    };
+async function handleSaveBUJK(e) {
+  e.preventDefault();
 
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          closeModal('modalBUJK');
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .saveBUJK(payload);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        closeModal('modalBUJK');
-        if (!mockDB.bujk) mockDB.bujk = [];
-        if (payload.id) {
-          const idx = mockDB.bujk.findIndex(b => b.id === payload.id);
-          if (idx !== -1) mockDB.bujk[idx] = payload;
-        } else {
-          payload.id = 'BUJK-' + Math.floor(1000 + Math.random() * 9000);
-          mockDB.bujk.push(payload);
-        }
-        showToast("Data BUJK berhasil disimpan!");
-        loadAllData();
-      }, 300);
-    }
+  const payload = {
+    id: document.getElementById('bujkId').value.trim(),
+    namaBujk: document.getElementById('bujkNama').value.trim(),
+    nib: document.getElementById('bujkNib').value.trim(),
+    pjbu: document.getElementById('bujkPjbu').value.trim(),
+    kualifikasi: document.getElementById('bujkKualifikasi').value,
+    klasifikasi: document.getElementById('bujkKlasifikasi').value.trim(),
+    alamat: document.getElementById('bujkAlamat').value.trim(),
+    noTelepon: document.getElementById('bujkTelepon').value.trim(),
+    statusSbu: document.getElementById('bujkStatusSbu').value
+  };
+
+  if (
+    !payload.namaBujk ||
+    !payload.nib ||
+    !payload.pjbu ||
+    !payload.klasifikasi ||
+    !payload.alamat
+  ) {
+    showToast('Data wajib BUJK belum lengkap.', false);
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest('saveBUJK', payload);
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      closeModal('modalBUJK');
+
+      showToast(
+        res.message || 'Data BUJK berhasil disimpan!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data BUJK gagal disimpan.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Save BUJK error:', error);
+
+    showToast(
+      'Tidak dapat menyimpan data BUJK ke Spreadsheet.',
+      false
+    );
+  }
+}
 
   function deleteBUJKItem(id) {
     if (!confirm("Apakah anda yakin menghapus data BUJK ini?")) return;
