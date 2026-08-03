@@ -1300,45 +1300,85 @@ async function deleteTKItem(id) {
     if (item) openModalPembinaan(item);
   }
 
-  function handleSavePembinaan(e) {
-    e.preventDefault();
-    const payload = {
-      id: document.getElementById('pemId').value,
-      judulPembinaan: document.getElementById('pemJudul').value,
-      tglPelaksanaan: document.getElementById('pemTgl').value,
-      kuota: document.getElementById('pemKuota').value,
-      lokasi: document.getElementById('pemLokasi').value,
-      status: document.getElementById('pemStatus').value,
-      deskripsi: document.getElementById('pemDeskripsi').value
-    };
+async function handleSavePembinaan(e) {
+  e.preventDefault();
 
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          closeModal('modalPembinaan');
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .savePembinaan(payload);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        closeModal('modalPembinaan');
-        if (!mockDB.pembinaan) mockDB.pembinaan = [];
-        if (payload.id) {
-          const idx = mockDB.pembinaan.findIndex(p => p.id === payload.id);
-          if (idx !== -1) mockDB.pembinaan[idx] = payload;
-        } else {
-          payload.id = 'PEM-' + Math.floor(1000 + Math.random() * 9000);
-          mockDB.pembinaan.push(payload);
-        }
-        showToast("Data pembinaan berhasil disimpan!");
-        loadAllData();
-      }, 300);
-    }
+  const payload = {
+    id: document.getElementById('pemId').value.trim(),
+    judulPembinaan: document
+      .getElementById('pemJudul')
+      .value
+      .trim(),
+    tglPelaksanaan: document
+      .getElementById('pemTgl')
+      .value,
+    kuota: document
+      .getElementById('pemKuota')
+      .value,
+    lokasi: document
+      .getElementById('pemLokasi')
+      .value
+      .trim(),
+    status: document
+      .getElementById('pemStatus')
+      .value,
+    deskripsi: document
+      .getElementById('pemDeskripsi')
+      .value
+      .trim()
+  };
+
+  if (
+    !payload.judulPembinaan ||
+    !payload.tglPelaksanaan ||
+    !payload.kuota ||
+    !payload.lokasi
+  ) {
+    showToast(
+      'Data wajib pembinaan belum lengkap.',
+      false
+    );
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'savePembinaan',
+      payload
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      closeModal('modalPembinaan');
+
+      showToast(
+        res.message || 'Data pembinaan berhasil disimpan!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data pembinaan gagal disimpan.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Save pembinaan error:', error);
+
+    showToast(
+      'Tidak dapat menyimpan data pembinaan ke Spreadsheet.',
+      false
+    );
+  }
+}
 
   function deletePembinaanItem(id) {
     if (!confirm("Hapus agenda pembinaan ini?")) return;
