@@ -899,7 +899,7 @@ async function deleteBUJKItem(id) {
     if (item) openModalProyek(item);
   }
 
-  function handleSaveProyek(e) {
+async function handleSaveProyek(e) {
   e.preventDefault();
 
   const lat = parseCoordinate(
@@ -915,7 +915,10 @@ async function deleteBUJKItem(id) {
     lat < -90 ||
     lat > 90
   ) {
-    showToast('Latitude tidak valid. Contoh: 5.203600', false);
+    showToast(
+      'Latitude tidak valid. Contoh: 5.203600',
+      false
+    );
     return;
   }
 
@@ -924,39 +927,84 @@ async function deleteBUJKItem(id) {
     lng < -180 ||
     lng > 180
   ) {
-    showToast('Longitude tidak valid. Contoh: 96.700900', false);
+    showToast(
+      'Longitude tidak valid. Contoh: 96.700900',
+      false
+    );
     return;
   }
 
   const payload = {
-    id: document.getElementById('proyekId').value,
-    judulProyek: document.getElementById('proyekJudul').value,
-    noKontrak: document.getElementById('proyekNoKontrak').value,
+    id: document.getElementById('proyekId').value.trim(),
+    judulProyek: document
+      .getElementById('proyekJudul')
+      .value
+      .trim(),
+    noKontrak: document
+      .getElementById('proyekNoKontrak')
+      .value
+      .trim(),
     tahun: document.getElementById('proyekTahun').value,
     nilaiProyek: document.getElementById('proyekNilai').value,
     status: document.getElementById('proyekStatus').value,
-    pptkBidang: document.getElementById('proyekPPTK').value,
+    pptkBidang: document
+      .getElementById('proyekPPTK')
+      .value
+      .trim(),
     lat: lat,
     lng: lng
   };
 
+  if (
+    !payload.judulProyek ||
+    !payload.noKontrak ||
+    !payload.tahun ||
+    !payload.nilaiProyek ||
+    !payload.pptkBidang
+  ) {
+    showToast(
+      'Data wajib proyek belum lengkap.',
+      false
+    );
+    return;
+  }
+
   showLoading();
 
-  if (isGasEnvironment) {
-    google.script.run
-      .withSuccessHandler(res => {
-        endLoading();
-        closeModal('modalProyek');
-        showToast(res.message, res.status === 'success');
-        loadAllData();
-      })
-      .withFailureHandler(err => {
-        endLoading();
-        showToast('Gagal menyimpan proyek: ' + err, false);
-      })
-      .saveProyek(payload);
-  } else {
-    // Pertahankan kode mode mock lama Anda di sini.
+  try {
+    const res = await apiRequest(
+      'saveProyek',
+      payload
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      closeModal('modalProyek');
+
+      showToast(
+        res.message || 'Data proyek berhasil disimpan!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data proyek gagal disimpan.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Save proyek error:', error);
+
+    showToast(
+      'Tidak dapat menyimpan data proyek ke Spreadsheet.',
+      false
+    );
   }
 }
 
