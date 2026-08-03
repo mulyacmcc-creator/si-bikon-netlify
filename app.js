@@ -1577,26 +1577,50 @@ async function handleSendRegistration(e) {
     }).join('');
   }
 
-  function changeStatusReg(id, status) {
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .updateStatusPendaftaran(id, status);
+async function changeStatusReg(id, status) {
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'updateStatusPendaftaran',
+      {
+        id: id,
+        status: status
+      }
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message ||
+          'Status pendaftaran berhasil diperbarui.',
+        true
+      );
+
+      await loadAllData();
     } else {
-      setTimeout(() => {
-        endLoading();
-        const target = (mockDB.pendaftaran || []).find(r => r.id === id);
-        if (target) target.statusPendaftaran = status;
-        showToast("Status pendaftaran diperbarui: " + status);
-        loadAllData();
-      }, 300);
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Status pendaftaran gagal diperbarui.',
+        false
+      );
     }
+  } catch (error) {
+    endLoading();
+
+    console.error(
+      'Update status pendaftaran error:',
+      error
+    );
+
+    showToast(
+      'Tidak dapat memperbarui status pendaftaran.',
+      false
+    );
   }
+}
 
   function deleteRegItem(id) {
     if (!confirm("Hapus data pendaftaran ini?")) return;
