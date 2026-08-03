@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SI-BIKON | Sistem Informasi Bina Konstruksi</title>
+  <?!= include('css'); ?>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Global Loading Spinner -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center text-white">
+    <div class="animate-spin rounded-full h-14 w-14 border-4 border-amber-500 border-t-transparent mb-4"></div>
+    <p class="text-lg font-medium tracking-wide">Memproses Data...</p>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 max-w-md w-full bg-slate-900 text-white p-4 rounded-xl shadow-2xl flex items-center justify-between space-x-3">
+    <div class="flex items-center space-x-3">
+      <i id="toastIcon" class="fas fa-check-circle text-emerald-400 text-xl"></i>
+      <span id="toastMessage" class="text-sm font-medium">Notifikasi</span>
+    </div>
+    <button onclick="hideToast()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+  </div>
+
+  <!-- Preview Mode Badge -->
+  <div id="previewBadge" class="hidden bg-amber-500 text-slate-950 font-bold text-xs py-1 px-4 text-center sticky top-0 z-40 shadow-sm flex items-center justify-center space-x-2">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>Mode Preview Standalone (Menggunakan Mock DB Lokal)</span>
+  </div>
+
+  <!-- AUTH SECTION -->
+  <div id="authSection" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-amber-950">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+      
+      <!-- App Header -->
+      <div class="bg-gradient-to-r from-amber-600 to-amber-700 p-8 text-center text-white relative">
+        <div class="inline-flex p-3 bg-white/10 rounded-2xl mb-3 backdrop-blur-md">
+          <i class="fas fa-hard-hat text-3xl text-amber-300"></i>
+        </div>
+        <h1 class="text-2xl font-black tracking-tight">SI-BIKON</h1>
+        <p class="text-amber-100 text-xs mt-1 font-light">Sistem Informasi Bina Konstruksi</p>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginCard" class="p-8">
+        <h2 class="text-lg font-bold text-slate-800 mb-6 text-center">Masuk ke System</h2>
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Username</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fas fa-user"></i></span>
+              <input type="text" id="loginUsername" required class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm outline-none transition" placeholder="Username anda">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fas fa-lock"></i></span>
+              <input type="password" id="loginPassword" required class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm outline-none transition" placeholder="••••••••">
+            </div>
+          </div>
+          <button type="submit" id="btnLogin" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold shadow-lg shadow-amber-600/30 transition duration-200 flex items-center justify-center space-x-2">
+            <span>Masuk Sekarang</span>
+            <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+        </form>
+
+        <div class="mt-6 text-center pt-4 border-t border-slate-100">
+          <p class="text-xs text-slate-500">Belum memiliki akun Public?</p>
+          <button onclick="toggleAuthCard('register')" class="text-amber-600 hover:text-amber-700 font-semibold text-xs mt-1 inline-block">Daftar Akun Baru</button>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerCard" class="p-8 hidden">
+        <h2 class="text-lg font-bold text-slate-800 mb-2 text-center">Pendaftaran Akun Public</h2>
+        <p class="text-xs text-slate-500 text-center mb-6">Daftar untuk mengikuti program pembinaan konstruksi</p>
+
+        <form onsubmit="handleRegister(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+            <input type="text" id="regFullName" required class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-amber-500 text-sm outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+              <input type="text" id="regUsername" required class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-amber-500 text-sm outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+              <input type="password" id="regPassword" required class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-amber-500 text-sm outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+            <input type="email" id="regEmail" required class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-amber-500 text-sm outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">No. HP / WhatsApp</label>
+            <input type="tel" id="regPhone" required class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-amber-500 text-sm outline-none">
+          </div>
+
+          <button type="submit" id="btnRegister" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-sm shadow-md transition duration-200 mt-2">
+            Daftar Sekarang
+          </button>
+        </form>
+
+        <div class="mt-4 text-center">
+          <button onclick="toggleAuthCard('login')" class="text-xs text-slate-500 hover:text-slate-800 font-medium"><i class="fas fa-arrow-left mr-1"></i> Kembali ke Login</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MAIN APP SECTION -->
+  <div id="mainSection" class="hidden flex-1 flex flex-col md:flex-row min-h-screen">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0">
+      <!-- Brand Logo -->
+      <div class="p-5 bg-slate-950 flex items-center space-x-3 border-b border-slate-800">
+        <div class="p-2 bg-amber-500 text-slate-950 rounded-xl">
+          <i class="fas fa-hard-hat text-xl"></i>
+        </div>
+        <div>
+          <h2 class="font-bold text-white text-base leading-tight">SI-BIKON BIREUEN</h2>
+          <span class="text-[10px] text-amber-400 uppercase tracking-widest font-semibold">Sistem Informasi Bina Konstruksi Kabupaten Bireuen</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 p-4 space-y-1">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-amber-400 bg-slate-800/80">
+          <i class="fas fa-chart-line w-5"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('bujk')" id="nav-bujk" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i class="fas fa-city w-5"></i>
+          <span>Informasi BUJK</span>
+        </button>
+        <button onclick="switchTab('proyek')" id="nav-proyek" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i class="fas fa-building-user w-5"></i>
+          <span>Data Proyek</span>
+        </button>
+        <button onclick="switchTab('tenagaKerja')" id="nav-tenagaKerja" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i class="fas fa-id-card w-5"></i>
+          <span>Tenaga Konstruksi</span>
+        </button>
+        <button onclick="switchTab('pembinaan')" id="nav-pembinaan" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i class="fas fa-graduation-cap w-5"></i>
+          <span>Pembinaan & Pelatihan</span>
+        </button>
+
+        <button onclick="switchTab('pengawasan')" id="nav-pengawasan" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i class="fas fa-clipboard-check w-5"></i>
+          <span>Pengawasan Bikon</span>
+        </button>
+
+        <button onclick="switchTab('pendaftaran')" id="nav-pendaftaran" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i class="fas fa-clipboard-list w-5"></i>
+          <span id="lblNavPendaftaran">Pendaftaran Peserta</span>
+        </button>
+        <button onclick="switchTab('users')" id="nav-users" class="nav-item role-admin w-full hidden flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i class="fas fa-users-gear w-5"></i>
+          <span>Manajemen User</span>
+        </button>
+      </nav>
+
+      <!-- User Profile Box -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-sm">
+            <span id="userAvatar">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="userNameDisplay" class="text-sm font-semibold text-white truncate">User Name</p>
+            <p id="userRoleBadge" class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Role</p>
+          </div>
+          <button onclick="handleLogout()" class="text-slate-400 hover:text-rose-400 p-2 rounded-lg transition" title="Keluar">
+            <i class="fas fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+      
+      <!-- Top Header Bar -->
+      <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
+        <h1 id="pageTitle" class="text-xl font-bold text-slate-800">Dashboard Utama</h1>
+        <div class="flex items-center space-x-3">
+          <button onclick="loadAllData()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center space-x-2">
+            <i class="fas fa-sync-alt"></i>
+            <span class="hidden sm:inline">Refresh Data</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dynamic Tab Views -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-teal-50 text-teal-600 rounded-xl"><i class="fas fa-city text-2xl"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-500">Total BUJK</p>
+                <h3 id="statTotalBUJK" class="text-2xl font-bold text-slate-800">0</h3>
+              </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-blue-50 text-blue-600 rounded-xl"><i class="fas fa-building text-2xl"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-500">Total Proyek</p>
+                <h3 id="statTotalProyek" class="text-2xl font-bold text-slate-800">0</h3>
+              </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-amber-50 text-amber-600 rounded-xl"><i class="fas fa-user-shield text-2xl"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-500">Tenaga Kerja SKK</p>
+                <h3 id="statTotalTK" class="text-2xl font-bold text-slate-800">0</h3>
+              </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-purple-50 text-purple-600 rounded-xl"><i class="fas fa-graduation-cap text-2xl"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-500">Program Pembinaan</p>
+                <h3 id="statTotalPembinaan" class="text-2xl font-bold text-slate-800">0</h3>
+              </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><i class="fas fa-users text-2xl"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-500">Peserta Terdaftar</p>
+                <h3 id="statTotalPendaftaran" class="text-2xl font-bold text-slate-800">0</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overview Lists -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+              <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center space-x-2">
+                <i class="fas fa-clipboard-check text-amber-500"></i>
+                <span>Program Pembinaan Terbaru</span>
+              </h3>
+              <div id="dashPembinaanList" class="space-y-3">
+                <!-- Dynamic Items -->
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+              <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center space-x-2">
+                <i class="fas fa-hard-hat text-amber-500"></i>
+                <span>Proyek Aktif</span>
+              </h3>
+              <div id="dashProyekList" class="space-y-3">
+                <!-- Dynamic Items -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Peta Sebaran Proyek Konstruksi -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                  <i class="fas fa-map-marked-alt text-amber-500"></i>
+                  <span>Peta Sebaran Proyek Konstruksi</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Pemetaan titik lokasi fisik proyek berdasarkan status pekerjaan di Kabupaten Bireuen</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-600">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block shadow-sm"></span> Sedang Berjalan</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block shadow-sm"></span> Selesai</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block shadow-sm"></span> Perencanaan</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block shadow-sm"></span> Dibatalkan</span>
+              </div>
+            </div>
+            <div id="mapDashboard" class="w-full h-80 sm:h-96 rounded-xl border border-slate-200 overflow-hidden z-10 bg-slate-100"></div>
+          </div>
+        </div>
+
+        <!-- TAB BUJK: INFORMASI BADAN USAHA JASA KONSTRUKSI -->
+        <div id="tab-bujk" class="tab-content hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <input type="text" id="searchBUJK" oninput="renderBUJKTable()" placeholder="Cari BUJK, NIB, PJBU, Klasifikasi..." class="w-full sm:w-72 px-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+              <button onclick="exportToExcel('bujk')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-file-excel"></i>
+                <span>Export Excel</span>
+              </button>
+              <button onclick="openModalBUJK()" class="role-staff-admin w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-plus"></i>
+                <span>Tambah BUJK</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th class="p-4">Nama Badan Usaha</th>
+                    <th class="p-4">NIB</th>
+                    <th class="p-4">PJBU / Pimpinan</th>
+                    <th class="p-4">Kualifikasi</th>
+                    <th class="p-4">Klasifikasi</th>
+                    <th class="p-4">Alamat & Kontak</th>
+                    <th class="p-4">Status SBU</th>
+                    <th class="p-4 text-center role-staff-admin">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblBUJK" class="divide-y divide-slate-100 text-sm">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: DATA PROYEK -->
+        <div id="tab-proyek" class="tab-content hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <input type="text" id="searchProyek" oninput="renderProyekTable()" placeholder="Cari Judul, No Kontrak, PPTK..." class="w-full sm:w-72 px-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+              <button onclick="exportToExcel('proyek')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-file-excel"></i>
+                <span>Export Excel</span>
+              </button>
+              <button onclick="openModalProyek()" class="role-staff-admin w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-plus"></i>
+                <span>Tambah Proyek</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th class="p-4">Judul Proyek</th>
+                    <th class="p-4">No. Kontrak</th>
+                    <th class="p-4">Nilai (Rp)</th>
+                    <th class="p-4">Tahun</th>
+                    <th class="p-4">PPTK / Bidang</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 text-center role-staff-admin">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblProyek" class="divide-y divide-slate-100 text-sm">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: TENAGA KONSTRUKSI -->
+        <div id="tab-tenagaKerja" class="tab-content hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <input type="text" id="searchTK" oninput="renderTKTable()" placeholder="Cari Nama, NIK, No SKK..." class="w-full sm:w-72 px-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+              <button onclick="exportToExcel('tenagaKerja')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-file-excel"></i>
+                <span>Export Excel</span>
+              </button>
+              <button onclick="openModalTK()" class="role-staff-admin w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-user-plus"></i>
+                <span>Tambah Tenaga Kerja</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th class="p-4">Nama Lengkap</th>
+                    <th class="p-4">NIK</th>
+                    <th class="p-4">No. HP</th>
+                    <th class="p-4">Klasifikasi</th>
+                    <th class="p-4">Sub Klasifikasi</th>
+                    <th class="p-4">Jabatan</th>
+                    <th class="p-4">No. Sertifikat / SKK</th>
+                    <th class="p-4">Kualifikasi</th>
+                    <th class="p-4">Jenjang</th>
+                    <th class="p-4">Tgl Sertifikat</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 text-center role-staff-admin">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblTenagaKerja" class="divide-y divide-slate-100 text-sm">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: PEMBINAAN & PELATIHAN -->
+        <div id="tab-pembinaan" class="tab-content hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 class="text-lg font-bold text-slate-800">Daftar Agenda Pembinaan</h2>
+            <button
+              type="button"
+              onclick="openModalPembinaan()"
+              class="role-staff-admin px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition flex items-center space-x-2 shadow-md">
+             <i class="fas fa-plus-circle"></i>
+             <span>Tambah Agenda Pembinaan</span>
+            </button>
+          </div>
+
+          <div id="gridPembinaan" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Dynamic Cards -->
+          </div>
+        </div>
+
+        <!-- TAB 5: PENDAFTARAN PESERTA -->
+        <div id="tab-pendaftaran" class="tab-content hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <h3 class="font-bold text-slate-800 text-sm">Riwayat & Daftar Peserta Pembinaan</h3>
+              <button onclick="exportToExcel('pendaftaran')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm">
+                <i class="fas fa-file-excel"></i>
+                <span>Export Excel</span>
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th class="p-4">ID / Tanggal</th>
+                    <th class="p-4">Program Pembinaan</th>
+                    <th class="p-4">Nama Peserta</th>
+                    <th class="p-4">Kontak (HP/Email)</th>
+                    <th class="p-4">Status Pendaftaran</th>
+                    <th class="p-4 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblPendaftaran" class="divide-y divide-slate-100 text-sm">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-pengawasan" class="tab-content hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <input type="text" id="searchPengawasan" oninput="renderPengawasanTable()" placeholder="Cari Judul Pekerjaan, Status K3..." class="w-full sm:w-72 px-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+              <button onclick="exportToExcel('pengawasan')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-file-excel"></i>
+                <span>Export Excel</span>
+              </button>
+              <button onclick="openModalPengawasan()" class="role-staff-admin w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-md">
+                <i class="fas fa-plus"></i>
+                <span>Tambah Pengawasan</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th class="p-4">ID / Judul Pekerjaan</th>
+                    <th class="p-4">Jumlah Pekerja</th>
+                    <th class="p-4">Checklist Kelengkapan K3</th>
+                    <th class="p-4">Dokumentasi Foto</th>
+                    <th class="p-4">Tahun</th>
+                    <th class="p-4">Status Pengawasan</th>
+                    <th class="p-4 text-center role-staff-admin">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblPengawasan" class="divide-y divide-slate-100 text-sm">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: USER MANAGEMENT (Admin Only) -->
+        <div id="tab-users" class="tab-content hidden space-y-4">
+          <div class="flex justify-between items-center">
+            <h2 class="text-lg font-bold text-slate-800">Pengelolaan Pengguna System</h2>
+            <button onclick="openModalUser()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition flex items-center space-x-2 shadow-md">
+              <i class="fas fa-user-plus"></i>
+              <span>Tambah User</span>
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th class="p-4">Username</th>
+                    <th class="p-4">Nama Lengkap</th>
+                    <th class="p-4">Email / HP</th>
+                    <th class="p-4">Role Access</th>
+                    <th class="p-4 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblUsers" class="divide-y divide-slate-100 text-sm">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Branding -->
+      <footer class="p-4 bg-white border-t border-slate-200 text-center text-xs text-slate-500">
+        Generated by GAS WebApp Builder | SI-BIKON &copy; 2024 Dinas Bina Konstruksi
+      </footer>
+    </main>
+  </div>
+
+  <!-- Include Modals & Client JavaScript -->
+  <?!= include('modal'); ?>
+  <?!= include('js'); ?>
+</body>
+</html>
