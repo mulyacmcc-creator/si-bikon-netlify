@@ -181,42 +181,70 @@ async function handleLogin(e) {
     );
   }
 }
-  function handleRegister(e) {
-    e.preventDefault();
-    const payload = {
-      fullName: document.getElementById('regFullName').value,
-      username: document.getElementById('regUsername').value,
-      password: document.getElementById('regPassword').value,
-      email: document.getElementById('regEmail').value,
-      phone: document.getElementById('regPhone').value
-    };
+async function handleRegister(e) {
+  e.preventDefault();
 
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          if (res.status === 'success') {
-            showToast(res.message, true);
-            toggleAuthCard('login');
-          } else {
-            showToast(res.message, false);
-          }
-        })
-        .registerPublicUser(payload);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.users.push({
-          id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
-          ...payload,
-          role: 'Public'
-        });
-        showToast('Registrasi akun berhasil! Silakan login.', true);
-        toggleAuthCard('login');
-      }, 300);
-    }
+  const payload = {
+    fullName: document.getElementById('regFullName').value.trim(),
+    username: document.getElementById('regUsername').value.trim(),
+    password: document.getElementById('regPassword').value.trim(),
+    email: document.getElementById('regEmail').value.trim(),
+    phone: document.getElementById('regPhone').value.trim()
+  };
+
+  if (
+    !payload.fullName ||
+    !payload.username ||
+    !payload.password ||
+    !payload.email ||
+    !payload.phone
+  ) {
+    showToast('Semua data registrasi wajib diisi.', false);
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'registerPublicUser',
+      payload
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Registrasi akun berhasil!',
+        true
+      );
+
+      document.getElementById('regFullName').value = '';
+      document.getElementById('regUsername').value = '';
+      document.getElementById('regPassword').value = '';
+      document.getElementById('regEmail').value = '';
+      document.getElementById('regPhone').value = '';
+
+      toggleAuthCard('login');
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Registrasi akun gagal.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Register error:', error);
+
+    showToast(
+      'Tidak dapat terhubung ke backend registrasi.',
+      false
+    );
+  }
+}
 
   function setupUserSession() {
     if (!currentUser) return;
