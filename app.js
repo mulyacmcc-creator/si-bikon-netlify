@@ -1,4 +1,4 @@
-<script>
+
   console.log("App generated using GAS WebApp Builder");
 
   // Dynamic Standalone Check & Global Mock DB
@@ -1811,4 +1811,3 @@ function handleSavePengawasan(e) {
     }
   }
 };
-</script>
