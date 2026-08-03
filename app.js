@@ -258,34 +258,45 @@ async function handleLogin(e) {
     showToast('Anda telah keluar dari aplikasi.');
   }
 
-  function loadAllData() {
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          if (res.status === 'success') {
-            appData = res;
-            renderAllViews();
-            showToast('Data berhasil diperbarui!');
-          } else {
-            showToast('Gagal memuat data: ' + res.message, false);
-          }
-        })
-        .withFailureHandler(err => {
-          endLoading();
-          showToast('Error koneksi: ' + err, false);
-        })
-        .getInitialData();
+async function loadAllData() {
+  showLoading();
+
+  try {
+    const res = await apiRequest('getInitialData');
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      appData = {
+        proyek: res.proyek || [],
+        tenagaKerja: res.tenagaKerja || [],
+        pembinaan: res.pembinaan || [],
+        pendaftaran: res.pendaftaran || [],
+        bujk: res.bujk || [],
+        users: res.users || [],
+        pengawasan: res.pengawasan || []
+      };
+
+      renderAllViews();
+      showToast('Data Spreadsheet berhasil dimuat!', true);
     } else {
-      setTimeout(() => {
-        endLoading();
-        appData = JSON.parse(JSON.stringify(mockDB));
-        renderAllViews();
-        showToast('Data mock berhasil dimuat!');
-      }, 300);
+      showToast(
+        'Gagal memuat data: ' +
+        (res && res.message ? res.message : 'Respons backend tidak valid'),
+        false
+      );
     }
+  } catch (error) {
+    endLoading();
+
+    console.error('Load data error:', error);
+
+    showToast(
+      'Tidak dapat memuat data dari Spreadsheet.',
+      false
+    );
   }
+}
 
   function renderAllViews() {
     renderDashboard();
