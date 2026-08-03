@@ -21,6 +21,22 @@
 
   return response.json();
 }
+async function testApiConnection() {
+  try {
+    const result = await apiRequest('ping');
+
+    console.log('Hasil koneksi API:', result);
+
+    if (result.status === 'success') {
+      showToast('Koneksi backend berhasil!', true);
+    } else {
+      showToast(result.message || 'Koneksi backend gagal.', false);
+    }
+  } catch (error) {
+    console.error('Kesalahan koneksi API:', error);
+    showToast('Tidak dapat terhubung ke backend.', false);
+  }
+}
 // Dynamic Standalone Check & Global Mock DB
   const isGasEnvironment = typeof google !== 'undefined' && google.script && google.script.run;
   
@@ -1831,3 +1847,6 @@ function handleSavePengawasan(e) {
     }
   }
 };
+window.addEventListener('load', function () {
+  testApiConnection();
+});
