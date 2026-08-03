@@ -1823,26 +1823,64 @@ async function handleSaveUser(e) {
   }
 }
 
-  function deleteUserItem(id) {
-    if (!confirm("Hapus pengguna ini?")) return;
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .deleteUser(id);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.users = (mockDB.users || []).filter(u => u.id !== id);
-        showToast("Pengguna dihapus!");
-        loadAllData();
-      }, 300);
-    }
+async function deleteUserItem(id) {
+  const isConfirmed = confirm(
+    'Apakah Anda yakin ingin menghapus pengguna ini?'
+  );
+
+  if (!isConfirmed) {
+    return;
   }
+
+  if (currentUser && currentUser.id === id) {
+    showToast(
+      'Akun yang sedang digunakan tidak dapat dihapus.',
+      false
+    );
+    return;
+  }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'deleteUser',
+      {
+        id: id
+      }
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Pengguna berhasil dihapus!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Pengguna gagal dihapus.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error(
+      'Delete user error:',
+      error
+    );
+
+    showToast(
+      'Tidak dapat menghapus pengguna dari Spreadsheet.',
+      false
+    );
+  }
+}
 
   function renderPengawasanTable() {
     const q = (document.getElementById('searchPengawasan')?.value || '').toLowerCase();
