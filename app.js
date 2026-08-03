@@ -39,6 +39,7 @@ async function testApiConnection() {
 }
 
   let currentUser = null;
+  let sessionToken = '';
   let appData = { proyek: [], tenagaKerja: [], pembinaan: [], pendaftaran: [], bujk: [], users: [], pengawasan: [] };
   let dashboardMap = null;
   let mapMarkersGroup = null;
@@ -117,6 +118,7 @@ async function handleLogin(e) {
 
     if (res && res.status === 'success') {
       currentUser = res.user;
+      sessionToken = res.sessionToken || '';
 
       setupUserSession();
 
@@ -244,6 +246,7 @@ async function handleRegister(e) {
 
   function handleLogout() {
     currentUser = null;
+    sessionToken = '';
     document.getElementById('mainSection').classList.add('hidden');
     document.getElementById('authSection').classList.remove('hidden');
     document.getElementById('loginUsername').value = '';
