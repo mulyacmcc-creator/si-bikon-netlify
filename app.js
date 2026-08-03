@@ -1,7 +1,27 @@
 
   console.log("App generated using GAS WebApp Builder");
+  const API_URL = 'https://script.google.com/macros/s/AKfycbztTLWWLOz5Gpny__wMaJ-AOtTiIW85t5Vkkm0O9V6rGmRwYhTiZW1OEmN0qIt8hNq-/exec';
+  async function apiRequest(action, payload = {}) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify({
+      action: action,
+      payload: payload
+    })
+  });
 
-  // Dynamic Standalone Check & Global Mock DB
+  if (!response.ok) {
+    throw new Error(
+      'HTTP ' + response.status + ': gagal menghubungi backend'
+    );
+  }
+
+  return response.json();
+}
+// Dynamic Standalone Check & Global Mock DB
   const isGasEnvironment = typeof google !== 'undefined' && google.script && google.script.run;
   
   // In-memory Standalone Mock DB with Distinct Coordinates
