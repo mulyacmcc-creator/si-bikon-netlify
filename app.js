@@ -1008,26 +1008,50 @@ async function handleSaveProyek(e) {
   }
 }
 
-  function deleteProyekItem(id) {
-    if (!confirm("Apakah anda yakin menghapus proyek ini?")) return;
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .deleteProyek(id);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.proyek = (mockDB.proyek || []).filter(p => p.id !== id);
-        showToast("Proyek berhasil dihapus!");
-        loadAllData();
-      }, 300);
-    }
+async function deleteProyekItem(id) {
+  const isConfirmed = confirm(
+    'Apakah Anda yakin ingin menghapus proyek ini?'
+  );
+
+  if (!isConfirmed) {
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest('deleteProyek', {
+      id: id
+    });
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Proyek berhasil dihapus!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Proyek gagal dihapus.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Delete proyek error:', error);
+
+    showToast(
+      'Tidak dapat menghapus proyek dari Spreadsheet.',
+      false
+    );
+  }
+}
 
   function renderTKTable() {
     const q = (document.getElementById('searchTK')?.value || '').toLowerCase();
