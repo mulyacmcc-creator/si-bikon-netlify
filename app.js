@@ -38,40 +38,6 @@ async function testApiConnection() {
   }
 }
 
-  
-  // In-memory Standalone Mock DB with Distinct Coordinates
-  let mockDB = {
-    proyek: [
-      { id: 'PRJ-001', judulProyek: 'Pembangunan Jembatan Bina Karya', noKontrak: '602/01/KONTRAK/2024', nilaiProyek: 2500000000, tahun: 2024, status: 'Sedang Berjalan', pptkBidang: 'Bidang Bina Marga', lat: 5.2085, lng: 96.7020 },
-      { id: 'PRJ-002', judulProyek: 'Rehabilitasi Gedung Pelatihan', noKontrak: '602/02/KONTRAK/2024', nilaiProyek: 850000000, tahun: 2024, status: 'Selesai', pptkBidang: 'Bidang Bina Konstruksi', lat: 5.1920, lng: 96.6910 },
-      { id: 'PRJ-003', judulProyek: 'Pembangunan Jalan Cot Gapu - Juli', noKontrak: '602/03/KONTRAK/2024', nilaiProyek: 1800000000, tahun: 2024, status: 'Perencanaan', pptkBidang: 'Bidang Bina Marga', lat: 5.2180, lng: 96.7210 },
-      { id: 'PRJ-004', judulProyek: 'Penataan Drainase Kota Bireuen', noKontrak: '602/04/KONTRAK/2024', nilaiProyek: 950000000, tahun: 2024, status: 'Dibatalkan', pptkBidang: 'Bidang Cipta Karya', lat: 5.1850, lng: 96.7130 }
-    ],
-    tenagaKerja: [
-      { id: 'TK-001', nama: 'Budi Santoso, ST', nik: '3201123456780001', noHp: '081211112222', klasifikasi: 'Sipil', subklasifikasi: 'Gedung', jabatan: 'Ahli Teknik Bangunan', noSertifikat: 'SKK-2023-09882', kualifikasi: 'Operator', jenjang: '2', tglSertifikat: '2023-05-12', status: 'Aktif' },
-      { id: 'TK-002', nama: 'Ahmad Hidayat', nik: '3201123456780002', noHp: '081333334444', klasifikasi: 'Arsitektur', subklasifikasi: 'Arsitektural', jabatan: 'Juru Gambar Arsitek', noSertifikat: 'SKK-2022-01123', kualifikasi: 'Operator', jenjang: '2', tglSertifikat: '2022-08-20', status: 'Aktif' }
-    ],
-    pembinaan: [
-      { id: 'PEM-001', judulPembinaan: 'Pelatihan Ahli K3 Konstruksi Tingkat Muda', tglPelaksanaan: '2024-09-15', kuota: 30, lokasi: 'Aula Dinas PUPR', status: 'Buka Pendaftaran', deskripsi: 'Bimbingan teknis keselamatan kerja konstruksi.' },
-      { id: 'PEM-002', judulPembinaan: 'Bimtek Sertifikasi Tukang Bangunan Gedung', tglPelaksanaan: '2024-10-10', kuota: 50, lokasi: 'Pusdiklat Konstruksi', status: 'Buka Pendaftaran', deskripsi: 'Peningkatan kapasitas tenaga terampil.' }
-    ],
-    pendaftaran: [
-      { id: 'REG-001', pembinaanId: 'PEM-001', pesertaNama: 'Dedi Prasetyo', pesertaNik: '3204998877660001', pesertaHp: '085299887766', email: 'dedi@gmail.com', statusPendaftaran: 'Disetujui', userId: 'USR-003' }
-    ],
-    bujk: [
-      { id: 'BUJK-001', namaBujk: 'PT. Bina Utama Konstruksi', nib: '9120001234567', pjbu: 'Ir. H. Muhammad Zaki', kualifikasi: 'Menengah', klasifikasi: 'Bangunan Sipil & Gedung', alamat: 'Jl. Merdeka No. 12, Bireuen', noTelepon: '081167001122', statusSbu: 'Aktif' },
-      { id: 'BUJK-002', namaBujk: 'CV. Karya Mandiri Tehnik', nib: '9120007654321', pjbu: 'Ahmad Ridwan, ST', kualifikasi: 'Kecil', klasifikasi: 'Konstruksi Khusus', alamat: 'Jl. Medan-Banda Aceh Km. 3', noTelepon: '085260113344', statusSbu: 'Aktif' }
-    ],
-    users: [
-      { id: 'USR-001', username: 'admin', password: 'Demo2024!', fullName: 'Administrator Utama', email: 'admin@sibikon.go.id', phone: '081234567890', role: 'Admin' },
-      { id: 'USR-002', username: 'staff', password: 'Demo2024!', fullName: 'Staff Bina Konstruksi', email: 'staff@sibikon.go.id', phone: '081298765432', role: 'Staff' }
-    ],
-    pengawasan: [
-      { id: 'PGS-001', judulPekerjaan: 'Pengawasan K3 Pembangunan Jembatan Bina Karya', jumlahPekerja: 25, checklistK3: 'Sesuai Standar K3', foto1: 'https://placehold.co/400x300?text=Foto+K3+1', foto2: 'https://placehold.co/400x300?text=Foto+K3+2', foto3: '', foto4: '', status: 'Sesuai Standar', tahun: '2024' },
-      { id: 'PGS-002', judulPekerjaan: 'Inspeksi K3 Rehabilitasi Gedung Pelatihan', jumlahPekerja: 12, checklistK3: 'APD Belum Lengkap', foto1: 'https://placehold.co/400x300?text=Foto+Gedung+1', foto2: '', foto3: '', foto4: '', status: 'Perlu Perbaikan', tahun: '2024' }
-    ]
-  };
-
   let currentUser = null;
   let appData = { proyek: [], tenagaKerja: [], pembinaan: [], pendaftaran: [], bujk: [], users: [], pengawasan: [] };
   let dashboardMap = null;
