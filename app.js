@@ -2220,27 +2220,56 @@ async function handleSavePengawasan(e) {
   }
 }
 
-  function deletePengawasanItem(id) {
-    if (!confirm("Apakah anda yakin menghapus data pengawasan ini?")) return;
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .deletePengawasan(id);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.pengawasan = (mockDB.pengawasan || []).filter(p => p.id !== id);
-        showToast("Data pengawasan dihapus!");
-        loadAllData();
-      }, 300);
-    }
+async function deletePengawasanItem(id) {
+  const isConfirmed = confirm(
+    'Apakah Anda yakin ingin menghapus data pengawasan ini?'
+  );
+
+  if (!isConfirmed) {
+    return;
   }
 
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'deletePengawasan',
+      {
+        id: id
+      }
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Data pengawasan berhasil dihapus!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data pengawasan gagal dihapus.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error(
+      'Delete pengawasan error:',
+      error
+    );
+
+    showToast(
+      'Tidak dapat menghapus data pengawasan dari Spreadsheet.',
+      false
+    );
+  }
+}
   function closeModal(modalId) {
     document.getElementById(modalId)?.classList.add('hidden');
   }
