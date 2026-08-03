@@ -792,26 +792,50 @@ async function handleSaveBUJK(e) {
   }
 }
 
-  function deleteBUJKItem(id) {
-    if (!confirm("Apakah anda yakin menghapus data BUJK ini?")) return;
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .deleteBUJK(id);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        mockDB.bujk = (mockDB.bujk || []).filter(b => b.id !== id);
-        showToast("Data BUJK berhasil dihapus!");
-        loadAllData();
-      }, 300);
-    }
+async function deleteBUJKItem(id) {
+  const isConfirmed = confirm(
+    'Apakah Anda yakin ingin menghapus data BUJK ini?'
+  );
+
+  if (!isConfirmed) {
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest('deleteBUJK', {
+      id: id
+    });
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      showToast(
+        res.message || 'Data BUJK berhasil dihapus!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data BUJK gagal dihapus.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Delete BUJK error:', error);
+
+    showToast(
+      'Tidak dapat menghapus data BUJK dari Spreadsheet.',
+      false
+    );
+  }
+}
 
   function renderProyekTable() {
     const q = (document.getElementById('searchProyek')?.value || '').toLowerCase();
