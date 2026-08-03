@@ -1117,50 +1117,86 @@ async function deleteProyekItem(id) {
     if (item) openModalTK(item);
   }
 
-  function handleSaveTK(e) {
-    e.preventDefault();
-    const payload = {
-      id: document.getElementById('tkId').value,
-      nama: document.getElementById('tkNama').value,
-      nik: document.getElementById('tkNik').value,
-      noHp: document.getElementById('tkHp').value,
-      klasifikasi: document.getElementById('tkklasifikasi').value,
-      subklasifikasi: document.getElementById('tksubklasifikasi').value,
-      jabatan: document.getElementById('tkjabatan').value,
-      noSertifikat: document.getElementById('tkSertifikat').value,
-      kualifikasi: document.getElementById('tkkualifikasi').value,
-      jenjang: document.getElementById('tkjenjang').value,
-      tglSertifikat: document.getElementById('tktglSertifikat').value,
-      status: document.getElementById('tkStatus').value
-    };
+async function handleSaveTK(e) {
+  e.preventDefault();
 
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          closeModal('modalTK');
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .saveTenagaKerja(payload);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        closeModal('modalTK');
-        if (!mockDB.tenagaKerja) mockDB.tenagaKerja = [];
-        if (payload.id) {
-          const idx = mockDB.tenagaKerja.findIndex(t => t.id === payload.id);
-          if (idx !== -1) mockDB.tenagaKerja[idx] = payload;
-        } else {
-          payload.id = 'TK-' + Math.floor(1000 + Math.random() * 9000);
-          mockDB.tenagaKerja.push(payload);
-        }
-        showToast("Data tenaga kerja berhasil disimpan!");
-        loadAllData();
-      }, 300);
-    }
+  const payload = {
+    id: document.getElementById('tkId').value.trim(),
+    nama: document.getElementById('tkNama').value.trim(),
+    nik: document.getElementById('tkNik').value.trim(),
+    noHp: document.getElementById('tkHp').value.trim(),
+    klasifikasi: document.getElementById('tkklasifikasi').value.trim(),
+    subklasifikasi: document
+      .getElementById('tksubklasifikasi')
+      .value
+      .trim(),
+    jabatan: document.getElementById('tkjabatan').value.trim(),
+    noSertifikat: document
+      .getElementById('tkSertifikat')
+      .value
+      .trim(),
+    kualifikasi: document.getElementById('tkkualifikasi').value,
+    jenjang: document.getElementById('tkjenjang').value.trim(),
+    tglSertifikat: document.getElementById('tktglSertifikat').value,
+    status: document.getElementById('tkStatus').value
+  };
+
+  if (
+    !payload.nama ||
+    !payload.nik ||
+    !payload.noHp ||
+    !payload.klasifikasi ||
+    !payload.subklasifikasi ||
+    !payload.jabatan ||
+    !payload.noSertifikat ||
+    !payload.jenjang ||
+    !payload.tglSertifikat
+  ) {
+    showToast(
+      'Data wajib tenaga kerja belum lengkap.',
+      false
+    );
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'saveTenagaKerja',
+      payload
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      closeModal('modalTK');
+
+      showToast(
+        res.message || 'Data tenaga kerja berhasil disimpan!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data tenaga kerja gagal disimpan.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Save tenaga kerja error:', error);
+
+    showToast(
+      'Tidak dapat menyimpan data tenaga kerja ke Spreadsheet.',
+      false
+    );
+  }
+}
 
   function deleteTKItem(id) {
     if (!confirm("Hapus data tenaga kerja ini?")) return;
