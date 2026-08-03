@@ -1722,45 +1722,106 @@ async function deleteRegItem(id) {
     if (item) openModalUser(item);
   }
 
-  function handleSaveUser(e) {
-    e.preventDefault();
-    const payload = {
-      id: document.getElementById('usrId').value,
-      username: document.getElementById('usrUsername').value,
-      password: document.getElementById('usrPassword').value,
-      fullName: document.getElementById('usrFullName').value,
-      email: document.getElementById('usrEmail').value,
-      phone: document.getElementById('usrPhone').value,
-      role: document.getElementById('usrRole').value
-    };
+async function handleSaveUser(e) {
+  e.preventDefault();
 
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          closeModal('modalUser');
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .saveUser(payload);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        closeModal('modalUser');
-        if (!mockDB.users) mockDB.users = [];
-        if (payload.id) {
-          const idx = mockDB.users.findIndex(u => u.id === payload.id);
-          if (idx !== -1) mockDB.users[idx] = { ...mockDB.users[idx], ...payload };
-        } else {
-          payload.id = 'USR-' + Math.floor(1000 + Math.random() * 9000);
-          mockDB.users.push(payload);
-        }
-        showToast("Data user berhasil disimpan!");
-        loadAllData();
-      }, 300);
-    }
+  const payload = {
+    id: document
+      .getElementById('usrId')
+      .value
+      .trim(),
+
+    username: document
+      .getElementById('usrUsername')
+      .value
+      .trim(),
+
+    password: document
+      .getElementById('usrPassword')
+      .value,
+
+    fullName: document
+      .getElementById('usrFullName')
+      .value
+      .trim(),
+
+    email: document
+      .getElementById('usrEmail')
+      .value
+      .trim(),
+
+    phone: document
+      .getElementById('usrPhone')
+      .value
+      .trim(),
+
+    role: document
+      .getElementById('usrRole')
+      .value
+  };
+
+  if (
+    !payload.username ||
+    !payload.fullName ||
+    !payload.email ||
+    !payload.role
+  ) {
+    showToast(
+      'Data wajib pengguna belum lengkap.',
+      false
+    );
+    return;
   }
+
+  if (!payload.id && !payload.password) {
+    showToast(
+      'Password wajib diisi untuk pengguna baru.',
+      false
+    );
+    return;
+  }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'saveUser',
+      payload
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      closeModal('modalUser');
+
+      showToast(
+        res.message || 'Data pengguna berhasil disimpan!',
+        true
+      );
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Data pengguna gagal disimpan.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error(
+      'Save user error:',
+      error
+    );
+
+    showToast(
+      'Tidak dapat menyimpan data pengguna ke Spreadsheet.',
+      false
+    );
+  }
+}
 
   function deleteUserItem(id) {
     if (!confirm("Hapus pengguna ini?")) return;
