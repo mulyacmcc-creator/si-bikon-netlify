@@ -37,8 +37,7 @@ async function testApiConnection() {
     showToast('Tidak dapat terhubung ke backend.', false);
   }
 }
-// Dynamic Standalone Check & Global Mock DB
-  const isGasEnvironment = typeof google !== 'undefined' && google.script && google.script.run;
+
   
   // In-memory Standalone Mock DB with Distinct Coordinates
   let mockDB = {
