@@ -1441,40 +1441,97 @@ async function deletePembinaanItem(id) {
     document.getElementById('modalDaftarPeserta').classList.remove('hidden');
   }
 
-  function handleSendRegistration(e) {
-    e.preventDefault();
-    const payload = {
-      pembinaanId: document.getElementById('regPembinaanId').value,
-      pesertaNama: document.getElementById('regPesertaNama').value,
-      pesertaNik: document.getElementById('regPesertaNik').value,
-      pesertaHp: document.getElementById('regPesertaHp').value,
-      email: document.getElementById('regPesertaEmail').value,
-      userId: currentUser ? currentUser.id : 'PUBLIC'
-    };
+async function handleSendRegistration(e) {
+  e.preventDefault();
 
-    showLoading();
-    if (isGasEnvironment) {
-      google.script.run
-        .withSuccessHandler(res => {
-          endLoading();
-          closeModal('modalDaftarPeserta');
-          showToast(res.message, res.status === 'success');
-          loadAllData();
-        })
-        .registerParticipant(payload);
-    } else {
-      setTimeout(() => {
-        endLoading();
-        closeModal('modalDaftarPeserta');
-        if (!mockDB.pendaftaran) mockDB.pendaftaran = [];
-        payload.id = 'REG-' + Math.floor(10000 + Math.random() * 90000);
-        payload.statusPendaftaran = 'Menunggu Verifikasi';
-        mockDB.pendaftaran.push(payload);
-        showToast("Pendaftaran Anda berhasil dikirim!");
-        loadAllData();
-      }, 300);
-    }
+  const payload = {
+    pembinaanId: document
+      .getElementById('regPembinaanId')
+      .value
+      .trim(),
+
+    pesertaNama: document
+      .getElementById('regPesertaNama')
+      .value
+      .trim(),
+
+    pesertaNik: document
+      .getElementById('regPesertaNik')
+      .value
+      .trim(),
+
+    pesertaHp: document
+      .getElementById('regPesertaHp')
+      .value
+      .trim(),
+
+    email: document
+      .getElementById('regPesertaEmail')
+      .value
+      .trim(),
+
+    userId: currentUser
+      ? currentUser.id
+      : 'PUBLIC'
+  };
+
+  if (
+    !payload.pembinaanId ||
+    !payload.pesertaNama ||
+    !payload.pesertaNik ||
+    !payload.pesertaHp ||
+    !payload.email
+  ) {
+    showToast(
+      'Data pendaftaran belum lengkap.',
+      false
+    );
+    return;
   }
+
+  showLoading();
+
+  try {
+    const res = await apiRequest(
+      'registerParticipant',
+      payload
+    );
+
+    endLoading();
+
+    if (res && res.status === 'success') {
+      closeModal('modalDaftarPeserta');
+
+      showToast(
+        res.message || 'Pendaftaran peserta berhasil dikirim!',
+        true
+      );
+
+      document.getElementById('regPesertaNama').value = '';
+      document.getElementById('regPesertaNik').value = '';
+      document.getElementById('regPesertaHp').value = '';
+      document.getElementById('regPesertaEmail').value = '';
+
+      await loadAllData();
+    } else {
+      showToast(
+        res && res.message
+          ? res.message
+          : 'Pendaftaran peserta gagal.',
+        false
+      );
+    }
+  } catch (error) {
+    endLoading();
+
+    console.error('Registration error:', error);
+
+    showToast(
+      'Tidak dapat mengirim pendaftaran ke Spreadsheet.',
+      false
+    );
+  }
+}
 
   function renderPendaftaranTable() {
     const tbody = document.getElementById('tblPendaftaran');
