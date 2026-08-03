@@ -2238,7 +2238,13 @@ async function deletePengawasanItem(id) {
         id: id
       }
     );
-
+    console.log(
+  'RESPON DELETE PENGAWASAN:',
+  {
+    idDikirim: id,
+    responsBackend: res
+  }
+  );
     endLoading();
 
     if (res && res.status === 'success') {
