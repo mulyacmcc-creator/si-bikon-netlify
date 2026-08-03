@@ -549,7 +549,429 @@
   </div>
 
   <!-- Include Modals & Client JavaScript -->
-  <?!= include('modal'); ?>
+  <!-- MODAL FORM BUJK -->
+<div id="modalBUJK" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+    <h3 id="modalBUJKTitle" class="text-lg font-bold text-slate-800 mb-4">Form BUJK</h3>
+    <form onsubmit="handleSaveBUJK(event)" class="space-y-3">
+      <input type="hidden" id="bujkId">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama BUJK (Badan Usaha)</label>
+        <input type="text" id="bujkNama" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="Contoh: PT. Karya Utama">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">NIB</label>
+          <input type="text" id="bujkNib" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">PJBU / Pimpinan</label>
+          <input type="text" id="bujkPjbu" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Kualifikasi</label>
+          <select id="bujkKualifikasi" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="Kecil">Kecil</option>
+            <option value="Menengah">Menengah</option>
+            <option value="Besar">Besar</option>
+            <option value="Spesialis">Spesialis</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Status SBU/Izin</label>
+          <select id="bujkStatusSbu" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="Aktif">Aktif</option>
+            <option value="Masa Perpanjangan">Masa Perpanjangan</option>
+            <option value="Non-Aktif">Non-Aktif</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Klasifikasi / Sub-Bidang Usaha</label>
+        <input type="text" id="bujkKlasifikasi" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="Contoh: Bangunan Sipil, Gedung">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">No. Telepon / WA</label>
+          <input type="text" id="bujkTelepon" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Alamat Kantor</label>
+          <input type="text" id="bujkAlamat" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 pt-4">
+        <button type="button" onclick="closeModal('modalBUJK')" class="px-4 py-2 border rounded-xl text-sm font-medium hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL FORM PROYEK -->
+<div id="modalProyek" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+    <h3 id="modalProyekTitle" class="text-lg font-bold text-slate-800 mb-4">Form Proyek</h3>
+    <form onsubmit="handleSaveProyek(event)" class="space-y-3">
+      <input type="hidden" id="proyekId">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Proyek</label>
+        <input type="text" id="proyekJudul" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">No. Kontrak</label>
+          <input type="text" id="proyekNoKontrak" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tahun</label>
+          <input type="number" id="proyekTahun" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nilai Proyek (Rp)</label>
+          <input type="number" id="proyekNilai" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Status Proyek</label>
+          <select id="proyekStatus" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="Perencanaan">Perencanaan</option>
+            <option value="Sedang Berjalan">Sedang Berjalan</option>
+            <option value="Selesai">Selesai</option>
+            <option value="Dibatalkan">Dibatalkan</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">PPTK / Bidang Penanggung Jawab</label>
+        <input type="text" id="proyekPPTK" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Koordinat Latitude</label>
+          <input type="number" step="any" id="proyekLat" placeholder="5.2013" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Koordinat Longitude</label>
+          <input type="number" step="any" id="proyekLng" placeholder="96.7011" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 pt-4">
+        <button type="button" onclick="closeModal('modalProyek')" class="px-4 py-2 border rounded-xl text-sm font-medium hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL FORM TENAGA KERJA -->
+<div id="modalTK" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <h3 id="modalTKTitle" class="text-lg font-bold text-slate-800 mb-4">Form Tenaga Kerja</h3>
+    <form onsubmit="handleSaveTK(event)" class="space-y-3">
+      <input type="hidden" id="tkId">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+        <input type="text" id="tkNama" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">NIK</label>
+          <input type="text" id="tkNik" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">No. HP / WA</label>
+          <input type="tel" id="tkHp" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Klasifikasi</label>
+          <input type="text" id="tkklasifikasi" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="Sipil / Arsitektur">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Sub Klasifikasi</label>
+          <input type="text" id="tksubklasifikasi" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="Gedung / Jalan">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Jabatan Kerja</label>
+        <input type="text" id="tkjabatan" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">No. Sertifikat / SKK</label>
+          <input type="text" id="tkSertifikat" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Kualifikasi</label>
+          <select id="tkkualifikasi" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="Operator">Operator</option>
+            <option value="Teknisi/Analis">Teknisi / Analis</option>
+            <option value="Ahli">Ahli</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jenjang</label>
+          <input type="text" id="tkjenjang" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="1-9">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tgl Sertifikat</label>
+          <input type="date" id="tktglSertifikat" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Status Tenaga Kerja</label>
+        <select id="tkStatus" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+          <option value="Aktif">Aktif</option>
+          <option value="Non-Aktif">Non-Aktif</option>
+        </select>
+      </div>
+      <div class="flex justify-end space-x-2 pt-4">
+        <button type="button" onclick="closeModal('modalTK')" class="px-4 py-2 border rounded-xl text-sm font-medium hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL FORM PEMBINAAN -->
+<div id="modalPembinaan" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+    <h3 id="modalPembinaanTitle" class="text-lg font-bold text-slate-800 mb-4">Form Program Pembinaan</h3>
+    <form onsubmit="handleSavePembinaan(event)" class="space-y-3">
+      <input type="hidden" id="pemId">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Program / Pelatihan</label>
+        <input type="text" id="pemJudul" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Pelaksanaan</label>
+          <input type="date" id="pemTgl" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Kuota Peserta</label>
+          <input type="number" id="pemKuota" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi Pelaksanaan</label>
+        <input type="text" id="pemLokasi" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Status Agenda</label>
+        <select id="pemStatus" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+          <option value="Buka Pendaftaran">Buka Pendaftaran</option>
+          <option value="Kuota Penuh">Kuota Penuh</option>
+          <option value="Selesai">Selesai</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi & Syarat</label>
+        <textarea id="pemDeskripsi" rows="3" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+      </div>
+      <div class="flex justify-end space-x-2 pt-4">
+        <button type="button" onclick="closeModal('modalPembinaan')" class="px-4 py-2 border rounded-xl text-sm font-medium hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL PENDAFTARAN PESERTA ONLINE -->
+<div id="modalDaftarPeserta" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+    <h3 class="text-lg font-bold text-slate-800 mb-1">Form Pendaftaran Pelatihan</h3>
+    <p id="lblSelectedPembinaan" class="text-xs text-amber-600 font-semibold mb-4">Program: -</p>
+    
+    <form onsubmit="handleSendRegistration(event)" class="space-y-3">
+      <input type="hidden" id="regPembinaanId">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap Peserta</label>
+        <input type="text" id="regPesertaNama" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">NIK</label>
+          <input type="text" id="regPesertaNik" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">No. HP / WhatsApp</label>
+          <input type="tel" id="regPesertaHp" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Email Peserta</label>
+        <input type="email" id="regPesertaEmail" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="flex justify-end space-x-2 pt-4">
+        <button type="button" onclick="closeModal('modalDaftarPeserta')" class="px-4 py-2 border rounded-xl text-sm font-medium hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md">Kirim Pendaftaran</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL USER MANAGEMENT -->
+<div id="modalUser" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+    <h3 id="modalUserTitle" class="text-lg font-bold text-slate-800 mb-4">Form Pengguna System</h3>
+    <form onsubmit="handleSaveUser(event)" class="space-y-3">
+      <input type="hidden" id="usrId">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+          <input type="text" id="usrUsername" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+          <input type="password" id="usrPassword" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="(Kosongkan jika tak diubah)">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+        <input type="text" id="usrFullName" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+          <input type="email" id="usrEmail" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Role Access</label>
+          <select id="usrRole" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="Staff">Staff</option>
+            <option value="Admin">Admin</option>
+            <option value="Public">Public</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">No. HP / WA</label>
+        <input type="text" id="usrPhone" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div class="flex justify-end space-x-2 pt-4">
+        <button type="button" onclick="closeModal('modalUser')" class="px-4 py-2 border rounded-xl text-sm font-medium hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL PENGAWASAN BIKON -->
+<div id="modalPengawasan" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <h3 id="modalPengawasanTitle" class="text-lg font-bold text-slate-800 mb-4">Form Pengawasan Bikon</h3>
+    <form onsubmit="handleSavePengawasan(event)" class="space-y-3">
+      <input type="hidden" id="pgwId">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Pekerjaan / Proyek</label>
+        <input type="text" id="pgwJudul" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="Contoh: Pengawasan K3 Pembangunan Jembatan">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Pekerja</label>
+          <input type="number" id="pgwJumlahPekerja" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="10">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tahun Anggaran</label>
+          <input type="number" id="pgwTahun" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Checklist Kelengkapan K3</label>
+        <input type="text" id="pgwChecklistK3" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="Lengkap APD, Rambu K3, P3K">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Status Pengawasan</label>
+        <select id="pgwStatus" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+          <option value="Sesuai Standar">Sesuai Standar</option>
+          <option value="Perlu Perbaikan">Perlu Perbaikan</option>
+          <option value="Diberhentikan Sementara">Diberhentikan Sementara</option>
+          <option value="Selesai">Selesai</option>
+        </select>
+      </div>
+
+      <div class="space-y-3 pt-3 border-t border-slate-200">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold text-slate-800 flex items-center">
+            <i class="fas fa-camera text-amber-500 mr-1.5 text-sm"></i> Dokumentasi Foto Lapangan (HP Real-time)
+          </p>
+          <span class="text-[10px] text-slate-400">Bisa Ambil Foto Kamera / Upload</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Slot 1 -->
+          <div>
+            <label class="block text-[11px] font-medium text-slate-500 mb-1">Foto 1</label>
+            <input type="hidden" id="pgwFoto1">
+            <label class="w-full h-24 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 relative overflow-hidden bg-slate-50">
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleCameraCapture(event, 1)">
+              <div id="iconBox1" class="text-center text-slate-400">
+                <i class="fas fa-camera text-xl mb-1"></i>
+                <p class="text-[10px]">Ambil Foto</p>
+              </div>
+              <img id="imgPreview1" class="hidden w-full h-full object-cover">
+            </label>
+          </div>
+
+          <!-- Slot 2 -->
+          <div>
+            <label class="block text-[11px] font-medium text-slate-500 mb-1">Foto 2</label>
+            <input type="hidden" id="pgwFoto2">
+            <label class="w-full h-24 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 relative overflow-hidden bg-slate-50">
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleCameraCapture(event, 2)">
+              <div id="iconBox2" class="text-center text-slate-400">
+                <i class="fas fa-camera text-xl mb-1"></i>
+                <p class="text-[10px]">Ambil Foto</p>
+              </div>
+              <img id="imgPreview2" class="hidden w-full h-full object-cover">
+            </label>
+          </div>
+
+          <!-- Slot 3 -->
+          <div>
+            <label class="block text-[11px] font-medium text-slate-500 mb-1">Foto 3</label>
+            <input type="hidden" id="pgwFoto3">
+            <label class="w-full h-24 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 relative overflow-hidden bg-slate-50">
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleCameraCapture(event, 3)">
+              <div id="iconBox3" class="text-center text-slate-400">
+                <i class="fas fa-camera text-xl mb-1"></i>
+                <p class="text-[10px]">Ambil Foto</p>
+              </div>
+              <img id="imgPreview3" class="hidden w-full h-full object-cover">
+            </label>
+          </div>
+
+          <!-- Slot 4 -->
+          <div>
+            <label class="block text-[11px] font-medium text-slate-500 mb-1">Foto 4</label>
+            <input type="hidden" id="pgwFoto4">
+            <label class="w-full h-24 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 relative overflow-hidden bg-slate-50">
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleCameraCapture(event, 4)">
+              <div id="iconBox4" class="text-center text-slate-400">
+                <i class="fas fa-camera text-xl mb-1"></i>
+                <p class="text-[10px]">Ambil Foto</p>
+              </div>
+              <img id="imgPreview4" class="hidden w-full h-full object-cover">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-4">
+        <button type="button" onclick="closeModal('modalPengawasan')" class="px-4 py-2 border rounded-xl text-sm font-medium hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md">Simpan Pengawasan</button>
+      </div>
+    </form>
+  </div>
+</div>
   <script src="app.js"></script>
 </body>
 </html>
