@@ -1,17 +1,17 @@
 
   console.log("App generated using GAS WebApp Builder");
   const API_URL = 'https://script.google.com/macros/s/AKfycbztTLWWLOz5Gpny__wMaJ-AOtTiIW85t5Vkkm0O9V6rGmRwYhTiZW1OEmN0qIt8hNq-/exec';
-  async function apiRequest(action, payload = {}) {
+async function apiRequest(action, payload = {}) {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'text/plain;charset=utf-8'
     },
     body: JSON.stringify({
-  action: action,
-  ...payload,
-  sessionToken: sessionToken || ''
-})
+      action: action,
+      ...payload,
+      sessionToken: sessionToken || ''
+    })
   });
 
   if (!response.ok) {
@@ -20,7 +20,33 @@
     );
   }
 
-  return response.json();
+  const result = await response.json();
+
+  if (result.code === 'SESSION_INVALID') {
+    currentUser = null;
+    sessionToken = '';
+
+    document
+      .getElementById('mainSection')
+      ?.classList.add('hidden');
+
+    document
+      .getElementById('authSection')
+      ?.classList.remove('hidden');
+
+    showToast(
+      result.message ||
+      'Sesi login telah berakhir. Silakan login kembali.',
+      false
+    );
+
+    throw new Error(
+      result.message ||
+      'Sesi login telah berakhir.'
+    );
+  }
+
+  return result;
 }
 async function testApiConnection() {
   try {
