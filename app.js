@@ -2308,17 +2308,6 @@ async function deletePengawasanItem(id) {
     mainSection.classList.add('hidden');
   }
 
-  const loginUsername = document.getElementById('loginUsername');
-  const loginPassword = document.getElementById('loginPassword');
-
-  if (loginUsername) {
-    loginUsername.value = '';
-  }
-
-  if (loginPassword) {
-    loginPassword.value = '';
-  }
-
  };
 window.addEventListener('load', function () {
   testApiConnection();
