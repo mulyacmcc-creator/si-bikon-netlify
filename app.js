@@ -342,13 +342,17 @@ async function handleRegister(e) {
     showToast('Anda telah keluar dari aplikasi.');
   }
 
-async function loadAllData() {
-  showLoading();
+async function loadAllData(showOverlay = true) {
+  if (showOverlay) {
+    showLoading();
+  }
 
   try {
     const res = await apiRequest('getInitialData');
 
-    endLoading();
+    if (showOverlay) {
+  endLoading();
+}
 
     if (res && res.status === 'success') {
       appData = {
@@ -371,7 +375,9 @@ async function loadAllData() {
       );
     }
 } catch (error) {
+  if (showOverlay) {
   endLoading();
+}
 
   console.error('Load data error:', error);
 
@@ -1060,7 +1066,7 @@ if (
         true
       );
 
-      await loadAllData();
+      await loadAllData(false);
     } else {
       showToast(
         res && res.message
