@@ -309,15 +309,12 @@ async function loadAllData() {
         false
       );
     }
- } catch (error) {
+} catch (error) {
   endLoading();
 
   console.error('Load data error:', error);
 
-  if (
-    String(error.message || '').includes('sesi') ||
-    String(error.message || '').includes('Token sesi')
-  ) {
+  if (!currentUser && !sessionToken) {
     return;
   }
 
