@@ -1048,15 +1048,14 @@ if (
     return;
   }
 
-  showLoading();
-
+  
   try {
     const res = await apiRequest(
       'saveProyek',
       payload
     );
 
-    endLoading();
+   
 
     if (res && res.status === 'success') {
       closeModal('modalProyek');
@@ -1076,8 +1075,7 @@ if (
       );
     }
   } catch (error) {
-    endLoading();
-
+    
     console.error('Save proyek error:', error);
 
     showToast(
