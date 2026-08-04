@@ -901,37 +901,50 @@ async function deleteBUJKItem(id) {
 async function handleSaveProyek(e) {
   e.preventDefault();
 
-  const lat = parseCoordinate(
-    document.getElementById('proyekLat').value
-  );
+ const latInput = document
+  .getElementById('proyekLat')
+  .value
+  .trim();
 
-  const lng = parseCoordinate(
-    document.getElementById('proyekLng').value
-  );
+const lngInput = document
+  .getElementById('proyekLng')
+  .value
+  .trim();
 
-  if (
+const lat = latInput ? parseCoordinate(latInput) : '';
+const lng = lngInput ? parseCoordinate(lngInput) : '';
+
+if (
+  latInput &&
+  (
     !Number.isFinite(lat) ||
     lat < -90 ||
     lat > 90
-  ) {
-    showToast(
-      'Latitude tidak valid. Contoh: 5.203600',
-      false
-    );
-    return;
-  }
+  )
+) {
+  showToast(
+    'Latitude tidak valid. Contoh: 5.203600',
+    false
+  );
 
-  if (
+  return;
+}
+
+if (
+  lngInput &&
+  (
     !Number.isFinite(lng) ||
     lng < -180 ||
     lng > 180
-  ) {
-    showToast(
-      'Longitude tidak valid. Contoh: 96.700900',
-      false
-    );
-    return;
-  }
+  )
+) {
+  showToast(
+    'Longitude tidak valid. Contoh: 96.700900',
+    false
+  );
+
+  return;
+}
 
   const payload = {
     id: document.getElementById('proyekId').value.trim(),
