@@ -309,16 +309,23 @@ async function loadAllData() {
         false
       );
     }
-  } catch (error) {
-    endLoading();
+ } catch (error) {
+  endLoading();
 
-    console.error('Load data error:', error);
+  console.error('Load data error:', error);
 
-    showToast(
-      'Tidak dapat memuat data dari Spreadsheet.',
-      false
-    );
+  if (
+    String(error.message || '').includes('sesi') ||
+    String(error.message || '').includes('Token sesi')
+  ) {
+    return;
   }
+
+  showToast(
+    'Tidak dapat memuat data dari Spreadsheet.',
+    false
+  );
+}
 }
 
   function renderAllViews() {
