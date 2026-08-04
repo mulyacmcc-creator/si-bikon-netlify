@@ -2,21 +2,82 @@
   console.log("App generated using GAS WebApp Builder");
   const API_URL = 'https://script.google.com/macros/s/AKfycbztTLWWLOz5Gpny__wMaJ-AOtTiIW85t5Vkkm0O9V6rGmRwYhTiZW1OEmN0qIt8hNq-/exec';
 async function apiRequest(action, payload = {}) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8'
-    },
-    body: JSON.stringify({
-      action: action,
-      ...payload,
-      sessionToken: sessionToken || ''
-    })
-  });
+  const safeRetryActions = [
+    'ping',
+    'getInitialData'
+  ];
+
+  const isSafeRetryAction =
+    safeRetryActions.includes(action);
+
+  const maxAttempts = isSafeRetryAction ? 3 : 1;
+
+  let response = null;
+  let lastError = null;
+
+  for (
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt++
+  ) {
+    try {
+      const controller = isSafeRetryAction
+        ? new AbortController()
+        : null;
+
+      const timeoutId = controller
+        ? setTimeout(() => {
+            controller.abort();
+          }, 25000)
+        : null;
+
+      response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify({
+          action: action,
+          ...payload,
+          sessionToken: sessionToken || ''
+        }),
+        ...(controller
+          ? { signal: controller.signal }
+          : {})
+      });
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      break;
+
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < maxAttempts) {
+        await new Promise(resolve => {
+          setTimeout(resolve, 1500);
+        });
+      }
+    }
+  }
+
+  if (!response) {
+    throw new Error(
+      lastError &&
+      lastError.name === 'AbortError'
+        ? 'Backend terlalu lama merespons.'
+        : 'Tidak dapat terhubung ke backend.'
+    );
+  }
 
   if (!response.ok) {
     throw new Error(
-      'HTTP ' + response.status + ': gagal menghubungi backend'
+      'HTTP ' +
+      response.status +
+      ': gagal menghubungi backend'
     );
   }
 
